@@ -1,0 +1,1 @@
+insert into consultation (id, description) values (1, 'description');
