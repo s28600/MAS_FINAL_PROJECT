@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Clients</title>
+    <style>
+        .top-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .client-list {
+            margin-top: 70px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 300px;
+        }
+
+        .client-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-button">
+    <form th:action="@{/persons/clients}" method="get">
+        <button type="submit">Display Clients</button>
+    </form>
+</div>
+
+<div class="client-list" th:if="${clients}">
+    <h2>Clients</h2>
+    <form action="#" method="post">
+        <ul>
+            <li th:each="client : ${clients}" class="client-item">
+                <input type="radio" name="selectedClientId" th:value="${client.id}" />
+                <span th:text="${client.name} + ' ' + ${client.surname} + ' (' + ${client.pesel} + ')'"></span>
+            </li>
+        </ul>
+        <button type="submit">Select</button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Client Management</title>
+    <style>
+        .container {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .scroll-box {
+            width: 250px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .list-button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 6px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .list-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .selected {
+            background-color: #cce5ff;
+            border-color: #66b3ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<!-- Display Clients Button -->
+<button id="displayClientsBtn" class="button" onclick="loadClients()">Display Clients</button>
+
+<!-- Main interactive content -->
+<div id="mainContent" class="container hidden">
+    <!-- Client List -->
+    <div id="clientListContainer"></div>
+
+    <!-- Appointments Button -->
+    <button id="displayAppointmentsBtn" class="button hidden">Display Appointments</button>
+
+    <!-- Appointments List -->
+    <div id="appointmentsContainer"></div>
+</div>
+
+<!-- CLIENT LIST FRAGMENT -->
+<div th:fragment="clientList">
+    <div class="scroll-box" id="clientList">
+        <button th:each="client : ${clients}"
+                th:id="'clientBtn-' + ${client.id}"
+                th:text="${client.name + ' ' + client.surname}"
+                class="list-button"
+                th:onclick="'selectClient(' + ${client.id} + ');'">
+        </button>
+    </div>
+</div>
+
+<!-- APPOINTMENT LIST FRAGMENT -->
+<div th:fragment="appointmentList">
+    <div class="scroll-box" id="appointmentList">
+        <button th:each="appt : ${appointments}"
+                th:id="'apptBtn-' + ${appt.id}"
+                th:text="'Appointment ID: ' + ${appt.id}"
+                class="list-button"
+                onclick="selectAppointment(this)">
+        </button>
+    </div>
+</div>
+
+<script>
+    let selectedClientId = null;
+
+    function loadClients() {
+        document.getElementById("displayClientsBtn").style.display = "none";
+        document.getElementById("mainContent").classList.remove("hidden");
+
+        fetch("/clients/all")
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById("clientListContainer").innerHTML = html;
+            });
+    }
+
+    function selectClient(id) {
+        selectedClientId = id;
+
+        // Deselect all client buttons
+        document.querySelectorAll("#clientList .list-button").forEach(btn => {
+            btn.classList.remove("selected");
+        });
+
+        // Select the clicked button
+        const btn = document.getElementById("clientBtn-" + id);
+        if (btn) btn.classList.add("selected");
+
+        // Show display appointments button
+        const displayAppointmentsBtn = document.getElementById("displayAppointmentsBtn");
+        displayAppointmentsBtn.classList.remove("hidden");
+        displayAppointmentsBtn.onclick = () => displayAppointments(id);
+    }
+
+    function displayAppointments(clientId) {
+        document.getElementById("displayAppointmentsBtn").classList.add("hidden");
+
+        fetch("/clients/" + clientId + "/appointments")
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById("appointmentsContainer").innerHTML = html;
+            });
+    }
+
+    function selectAppointment(button) {
+        // Deselect all appointment buttons
+        document.querySelectorAll("#appointmentList .list-button").forEach(btn => {
+            btn.classList.remove("selected");
+        });
+
+        // Select clicked one
+        button.classList.add("selected");
+    }
+</script>
+</body>
+</html>
